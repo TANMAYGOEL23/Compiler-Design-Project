@@ -1,0 +1,227 @@
+================================================================================
+          AUTOMATA-BASED PROBABILISTIC DNA MOTIF DETECTION
+         Compiler Design & Theory of Computation Case Study Report
+================================================================================
+
+--------------------------------------------------------------------------------
+PROJECT TEAM DETAILS
+--------------------------------------------------------------------------------
++-------+-------------------------+---------------------+---------------------------------------------------------------+
+| S.No. | Team Member Name        | Reg. / Roll Number  | Project Role & Module Contribution                            |
++-------+-------------------------+---------------------+---------------------------------------------------------------+
+|   1   | Tanmay Goel (Leader)    | [ Enter Roll No ]   | Module 1: 20-Motif Modeling, Information Theory & Staden DP   |
+|   2   | [ Team Member 2 Name ]  | [ Enter Roll No ]   | Module 2: Formal Automata Engines, 2D Mismatch & VM           |
+|   3   | [ Team Member 3 Name ]  | [ Enter Roll No ]   | Module 3: 20-Genome Registry, DNA Appender & Dual-Strand Scan |
+|   4   | [ Team Member 4 Name ]  | [ Enter Roll No ]   | Module 4: Ground-Truth Evaluation, ROC Curves & Profiler      |
++-------+-------------------------+---------------------+---------------------------------------------------------------+
+
+
+================================================================================
+1. COMPILER DESIGN CONNECTION (THEORY & CONCEPTS)
+================================================================================
+The fundamental objective of a Compiler's Lexical Analyzer (Lexer) is pattern
+recognition over a stream of input tokens. In classical compiler theory, regular
+expressions are compiled into Deterministic Finite Automata (DFAs) that consume
+characters and transition between states to classify tokens using Boolean
+accept/reject logic.
+
+This project translates that compiler foundation into computational biology by
+modeling variable DNA patterns as Weighted Finite Automata (WFAs):
+
+• Finite Alphabet (Σ):
+  DNA nucleotide alphabet Σ = {A, C, G, T}, extended with IUPAC degenerate
+  symbols (R, Y, S, W, K, M, N) mapped to compiler input tokens.
+
+• Lexeme / Token Pattern:
+  The target transcription factor binding sites (e.g. GATA1, p53, CTCF, SP1)
+  are treated as target lexical tokens.
+
+• Automaton State Chain:
+  States q0 → q1 → ... → qL represent milestone positions consumed in the sliding
+  window.
+
+• Weighted Transitions (W):
+  Instead of binary transitions (e.g. G → next_state), each transition carries a
+  log-odds weight derived from Position-Specific Scoring Matrices (PSSM):
+  G / weight → next_state.
+  The accumulated weight represents quantitative sequence affinity.
+
+• 2D State Space q(i, k):
+  Tracks motif position 'i' and consumed mismatch budget 'k' in state space q(i, k),
+  enforcing error tolerance constraints (0 ≤ k ≤ K_max).
+
+• Lookahead Branch-and-Bound Pruning:
+  Prunes search branches when the remaining maximum suffix score cannot reach
+  the required threshold, directly mirroring compiler dead-code elimination.
+
+
+================================================================================
+2. WHAT THE PROJECT ACHIEVES
+================================================================================
+• Solves Exact Match Rigidity:
+  Traditional exact string matching / classical DFAs fail because biological
+  transcription factors tolerate mutations. The WFA scores affinity probabilistically.
+
+• 20-Motif Bank Registry:
+  Expanded from a single motif to 20 biologically verified transcription factors
+  (JASPAR profiles) spanning 6 bp to 20 bp (GATA1, CTCF, SP1, TATA, NF-kB, AP-1,
+  p53, MYC, STAT3, FOXA1, ESR1, SOX2, OCT4, HNF4A, CREB1, E2F1, CEBPA, RUNX1,
+  PAX6, MEF2A).
+
+• 20-Genome Reference Registry:
+  Provides 20 preloaded genomic loci across human chromosomes and model organisms
+  (Human Chr11 HBB, Chr17 TP53, Chr8 MYC, Mouse Hbb, Zebrafish gata1a, Yeast,
+  Viruses, Bacteria).
+
+• Custom DNA Sequence Addition & Sequence Appending:
+  Users can add brand new custom DNA sequences or append additional sequence bases
+  directly to any selected genome ("add a dna seq after find a selected one").
+
+• Modern Interactive Python UI (Tkinter/TTK):
+  Native desktop GUI application (gui_app.py) featuring interactive motif selection,
+  genome viewers, canvas automaton graph drawing, step-by-step tracers, and result tables.
+
+
+================================================================================
+3. SYSTEM RESULTS & SCREENSHOT WALKTHROUGH
+================================================================================
+
+--------------------------------------------------------------------------------
+[ SCREENSHOT 1 ] 20-Motif Explorer & PSSM Calculation (Module 1 / GUI Tab 1)
+--------------------------------------------------------------------------------
++------------------------------------------------------------------------------+
+|                                                                              |
+|                       📷 [ PASTE SCREENSHOT 1 HERE ]                         |
+|                                                                              |
+|  (Screenshot of GUI Tab 1 / Module 1 showing Motif Selector with 20 options, |
+|   PFM counts, PPM probabilities, PSSM log-odds matrix, Information Content,  |
+|   and Staden DP P-value threshold inversion)                                 |
+|                                                                              |
++------------------------------------------------------------------------------+
+
+Minimal Result Explanation (Screenshot 1):
+• Probability Conversion:
+  Transforms raw JASPAR counts into smoothed probabilities using
+  pseudocount α = 0.1 to avoid zero-division in logarithms.
+• Information Content:
+  Computes PSSM log-odds scores. Position 4 in GATA1 shows maximum conservation
+  (1.55 bits, strong T preference), yielding Total Information Content = 5.904 bits.
+• P-Value Threshold Inversion:
+  Applies Staden Dynamic Programming discrete convolution to compute exact
+  P-values and inverts them to find the score threshold for P ≤ 10⁻³.
+
+
+--------------------------------------------------------------------------------
+[ SCREENSHOT 2 ] Interactive Automata Canvas Visualizer (Module 2 / GUI Tab 2)
+--------------------------------------------------------------------------------
++------------------------------------------------------------------------------+
+|                                                                              |
+|                       📷 [ PASTE SCREENSHOT 2 HERE ]                         |
+|                                                                              |
+|  (Screenshot of GUI Tab 2 showing Canvas state graph q0->q1->...->qL,        |
+|   Step-by-step diagnostic trace for 'AGATAG', and Bytecode VM disassembly)   |
+|                                                                              |
++------------------------------------------------------------------------------+
+
+Minimal Result Explanation (Screenshot 2):
+• Automaton Graph Visualizer:
+  Visualizes states q0 through qL on the Canvas with color coding (Start in
+  green, Accept in double-circle blue, active path states highlighted in yellow).
+• 1D-WFA Execution Trace:
+  Step-by-step trace demonstrates state traversal q0→q1→...→q6 with weights
+  (+0.89, +1.74, +1.73, +1.90, +1.64, -2.68) yielding Total Score = +5.221.
+• Bytecode VM Disassembly:
+  Shows linear opcode instructions (READ_BASE, ADD_WEIGHT, ACCEPT_HIT) compiled
+  for virtual machine execution.
+
+
+--------------------------------------------------------------------------------
+[ SCREENSHOT 3 ] 20-Genome Registry & DNA Sequence Appender (Module 3 / GUI Tab 1)
+--------------------------------------------------------------------------------
++------------------------------------------------------------------------------+
+|                                                                              |
+|                       📷 [ PASTE SCREENSHOT 3 HERE ]                         |
+|                                                                              |
+|  (Screenshot of GUI Tab 1 showing Genome dropdown with 20 options, Sequence  |
+|   Viewer, and 'Add / Append DNA Sequence' action with success notification)  |
+|                                                                              |
++------------------------------------------------------------------------------+
+
+Minimal Result Explanation (Screenshot 3):
+• 20-Genome Registry:
+  User can select from 20 authentic genomic loci (Human Chr11 HBB, Chr17 TP53,
+  Chr8 MYC, Mouse Hbb, Zebrafish gata1a, etc.).
+• Live DNA Sequence Appending:
+  Appends additional DNA bases (e.g. 50 bp regulatory fragment) directly to the
+  active genome, instantly updating coordinates and length.
+• Sequence Sanitization:
+  Validates and cleans input DNA, stripping invalid characters and computing
+  updated regional GC content.
+
+
+--------------------------------------------------------------------------------
+[ SCREENSHOT 4 ] Dual-Strand Genomic Scanner & Results Table (Module 3 / GUI Tab 3)
+--------------------------------------------------------------------------------
++------------------------------------------------------------------------------+
+|                                                                              |
+|                       📷 [ PASTE SCREENSHOT 4 HERE ]                         |
+|                                                                              |
+|  (Screenshot of GUI Tab 3 showing Dual-Strand (+/-) results Treeview,       |
+|   surrounding genomic context preview, and BED/GFF3/CSV export buttons)      |
+|                                                                              |
++------------------------------------------------------------------------------+
+
+Minimal Result Explanation (Screenshot 4):
+• Dual-Strand Coordinate Pipeline:
+  Scans both forward (+) and reverse-complement (-) strands with exact chromosome
+  coordinate mapping.
+• Results Table Inspector:
+  Interactive Treeview displays hit start/end, strand, matched sequence, score,
+  p-value, and mismatch count.
+• Genomic Context Viewer:
+  Clicking any hit row extracts and highlights the surrounding ±20 bp genomic context.
+
+
+--------------------------------------------------------------------------------
+[ SCREENSHOT 5 ] Ground-Truth Evaluation & Scalability Profiler (Module 4 / GUI Tab 4)
+--------------------------------------------------------------------------------
++------------------------------------------------------------------------------+
+|                                                                              |
+|                       📷 [ PASTE SCREENSHOT 5 HERE ]                         |
+|                                                                              |
+|  (Screenshot of GUI Tab 4 showing Confusion Matrix TP/FP/FN/TN, Optimal      |
+|   Operating Threshold, and Multi-Engine Scalability comparison table)        |
+|                                                                              |
++------------------------------------------------------------------------------+
+
+Minimal Result Explanation (Screenshot 5):
+• Ground-Truth Benchmark:
+  Synthetic sequence with known implanted mutated motifs evaluates Precision,
+  Recall, F1, and MCC without circular bias.
+• Optimal Threshold Detector:
+  Systematic threshold sweep identifies optimal score cutoff maximizing F1-score.
+• Scalability & Profiler:
+  Direct PSSM and Pruned WFA achieve high throughput (~0.78 Mbp/s) with minimal
+  memory footprint (< 55 KB).
+
+
+================================================================================
+4. SUMMARY & KEY TAKEAWAYS FOR REVIEW / VIVA
+================================================================================
+1. Why Automata?
+   A standard compiler asks "Is this token valid?" (Boolean accept/reject).
+   Our Weighted Finite Automaton asks "How strongly does this input match the
+   pattern?" (Probabilistic log-odds scoring).
+
+2. Why WFA over DFA?
+   Exact regex matches only a few sites. The probabilistic WFA identifies
+   hundreds of candidate regulatory sites, capturing biological mutation tolerance.
+
+3. Why 2D Mismatch Automaton?
+   The 2D state space q(i, k) explicitly tracks position and mutation budget,
+   bridging compiler state-space tracking with biological error tolerance.
+
+4. Rich Biological Breadth:
+   Preloaded 20 transcription factors and 20 reference genomes, with an
+   interactive desktop GUI and sequence appender.
+================================================================================
